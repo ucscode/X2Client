@@ -465,7 +465,7 @@ class X2Client {
 		foreach( $node->attributes as $attr ) {
 			if( $attr->name == 'style' ) {
 				if( !in_array( $this->HTMLTag( $node->nodeName ), $this->block ) ) continue;
-			} else if( in_array( $attr->name, ['class', 'href', 'src'] ) ) continue;
+			} else if( in_array( $attr->name, ['href', 'src'] ) ) continue;
 			$td->setAttribute( $attr->name, $attr->value );
 		}
 		
@@ -500,6 +500,8 @@ class X2Client {
 		
 		if( !$this->isElement($node) ) return;
 		
+		$el->setAttribute( "data-marker", $this->HTMLTag( $node->nodeName ) );
+		
 		$markers = array(
 			'id' => '#',
 			'class' => '.'
@@ -508,12 +510,15 @@ class X2Client {
 		foreach( $markers as $attr => $selector ) {
 			$value = trim( $node->getAttribute( $attr ) );
 			if( !empty($value) ) {
-				$el->setAttribute( "data-marker", "{$selector}{$value}" );
-				return;
+				$marker = $el->getAttribute( "data-marker" );
+				if( $attr == 'id' ) $marker .= "{$selector}{$value}";
+				else {
+					$marked = implode('.', array_map('trim', explode(" ", $value)));
+					$marker .= ".{$marked}";
+				};
+				$el->setAttribute( "data-marker", $marker );
 			};
 		};
-		
-		$el->setAttribute( "data-marker", $this->HTMLTag( $node->nodeName ) );
 		
 	}
 	
@@ -544,7 +549,7 @@ class X2Client {
 		
 	}
 	
-	public function render() {
+	public function render( ?string $css_selector = null ) {
 		
 		/*
 		
@@ -589,8 +594,14 @@ class X2Client {
 			
 			$result = '';
 			
-			foreach( $element->childNodes as $node ) 
-				$result .= $this->dom->saveXML( $node ) . "\n";
+			$nodeParent = $this->renderMode( $element, $css_selector );
+			
+			if( $nodeParent === $element ) {
+				
+				foreach( $nodeParent->childNodes as $node ) 
+					$result .= $this->dom->saveXML( $node ) . "\n";
+					
+			} else $result = $this->dom->saveXML( $nodeParent );
 			
 			/*
 				Hurray! We made it!
@@ -599,6 +610,20 @@ class X2Client {
 			return $result;
 			
 		} else return false;
+		
+	}
+	
+	protected function renderMode( $element, $css_selector ) {
+		
+		$css_selector = preg_replace( "/{$this->namespace}:/i", '', trim($css_selector) );
+		
+		$xquery = (string)(new Gt\CssXPath\Translator( $css_selector ));
+		
+		$node = $this->xpath->query( $xquery )->item( 0 );
+		
+		if( $node ) $element = $node;
+		
+		return $element;
 		
 	}
 	
