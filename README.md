@@ -204,23 +204,22 @@ Next, you have to render the output using the X2Client instance;
 
 It's that simple!
 
-For the reference, you can make an element display in columns (as in flex) by adding `display='flex'` to the block element
+### Love this project! Buy me coffee
 
-```php
+------------------------------------------------
 
-<x2:div display='flex'>
+_BTC Wallet:_ **bc1qg54zcgmj3ltexnajnz8zqq0au7jj34qnyrza0n**
 
-  <x2:div /> <!-- flex -->
-  
-  <x2:div /> <!-- flex -->
-  
-  <x2:div>  <!-- flex -->
-  
-    <x2:div /> <!-- not flex -->
-    
-  </x2:div> 
-  
-</x2:div>
+------------------------------------------------
 
-```
+Website: https://ucscode.me
+
+Always available for freelancing: 
+
+**CONTACT:** _uche23mail@gmail.com_
+
+
+
+
+
 
