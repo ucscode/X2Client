@@ -9,7 +9,7 @@ I think of it as a new revolution developer forced to embrace the coding mechani
 
 A lot of email templates are available on the internet, the only problem is that they're just templates. I mean after downloading them, you'll still have to write your own custom code into the template. Which means, the email client will support the template but will likely not support your codes within the template.
 
-#### These are several actions that makes email difficult to write
+#### These are several actions that makes email difficult to write including the fact that:
 
 1. Most email client will remove internal CSS
 2. Some email client will remove or override inline styles in elements such as **P**
@@ -17,8 +17,8 @@ A lot of email templates are available on the internet, the only problem is that
 4. Email clients may require attribute declaration rather than style. E.g `width='100%'` instead of `style='width:100%'`
 5. You have to do unlimited testing on multiple email client
 6. There are no universal rules on how email clients should render emails
-7. If you have to style all `<td>` element, internal CSS will fail. Therefore, you have to inline style each and every `<td>` element accordingly
-8. In email the use of `<h1>` to `<h6>` and `<p>` tags leads to missing margins. Therefore, `<td>`  is used to style the text instead.
+7. If you have to style all `<td>` element, internal CSS will likely fail. Therefore, you have to write each rule as an inline style on each and every `<td>` element accordingly
+8. In email, the use of `<h1>` to `<h6>` and `<p>` tags leads to missing margins. Therefore, `<td>`  is used to style the text instead.
 9. The `<ol>` and `<ul>` tags do not work on all email clients. Thus, ordered and unordered lists are coded with tables.
 
 And Others! Although most of these problems can be resolved with a few techniques. The biggest frustration in coding email template still remain the use of nested tables and table rows.
@@ -27,7 +27,7 @@ And Others! Although most of these problems can be resolved with a few technique
 
 X2Client is a PHP library that converts HTML 5 related syntax into table format that is supported by most email client.
 
-By HTML 5 related syntax, I mean it's not really HTML but an XML that follows a similar coding convention making it easier to understand.
+By HTML 5 related syntax, I mean it's not really HTML 5 but an XML syntax that follows a similar coding convention as HTML (using the same tagName) making it easier to read, write &amp; understand.
 
 ## HOW TO USE
 
@@ -52,11 +52,11 @@ By HTML 5 related syntax, I mean it's not really HTML but an XML that follows a 
   
   $X2Client = new X2Client( $EMAIL_STRING )
   
-  echo $X2Client->render();
+  echo $X2Client->render(); // Converts the string into an HTML Table
   
 ```
 
-X2Client uses the same syntax as HTML 5, except that it begins with a prefix `x2:`.
+X2Client uses the same syntax as HTML 5, except that it begins with the prefix `x2`.
 
 The `x2` prefix is what differentiates it from normal HTML 5 which enables it render into table set that are suitable for emails
 
@@ -71,7 +71,7 @@ The `x2` prefix is what differentiates it from normal HTML 5 which enables it re
 
 ### HOW IT WORKS
 
-You have to write you regular HTML 5 stynax with each tag following the prefix `x2`
+You have to write you regular HTML 5 stynax with each tag following the prefix &mdash; `x2`
 
 ```php
 
