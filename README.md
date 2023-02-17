@@ -4,7 +4,7 @@ Convert HTML 5 related syntax into Table format supported by **MULTIPLE** email 
 
 One of the biggest pain ever encountered in coding is sending email. As advance as browsers are getting, the support for HTML 5 syntax is not versatile in email clients.
 
-Rather that writing pure HTML code, you'll have to code using table. I think of it as a new revolution developing forced to embrace the coding mechanism of 1998.
+Rather that writing pure HTML code, you'll have to code using table. I think of it as a new revolution developer forced to embrace the coding mechanism of 1998.
 
 A lot of email templates are available on the internet, the only problem is that they're just templates. I mean after downloading them, you'll still have to write your own custom code into the template. Which means, the email client will support the template but will likely not support your codes within the template.
 
