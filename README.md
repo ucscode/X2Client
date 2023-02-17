@@ -1,4 +1,5 @@
 # X2Client
+##### Version 1.0
 Convert HTML 5 related syntax into Table format supported by all email clients
 
 One of the biggest pain ever encountered in coding is sending email. As advance as browsers are getting, the support for HTML 5 syntax is not versatile in email clients.
@@ -25,8 +26,217 @@ And Others! Although most of these problems can be resolved with a few technique
 
 X2Client is a PHP library that converts HTML 5 related syntax into table format that is supported by most email client.
 
-By HTML 5 related syntax, I mean it's not really HTML but it follows a similar pattern making it easier to understand.
+By HTML 5 related syntax, I mean it's not really HTML but an XML that follows a similar coding convention making it easier to understand.
 
-## HOW TO INCLUDE
+## HOW TO USE
 
-1. Download the repo
+```php
+<?php 
+
+  require_once __DIR__ . "/X2Client.php";
+  
+  $EMAIL_STRING = "
+  
+    <x2:div>
+    
+      <x2:div class='my-class'>
+      
+        <x2:p>This is a paragraph</x2:p>
+        
+      </x2:div>
+      
+    </x2:div>
+    
+  ";
+  
+  $X2Client = new X2Client( $EMAIL_STRING )
+  
+  echo $X2Client->render();
+  
+```
+
+X2Client uses the same syntax as HTML 5, except that it begins with a prefix `x2:`.
+
+The `x2` prefix is what differentiates it from normal HTML 5 which enables it render into table set that are suitable for emails
+
+#### What can X2Client help you do?
+
+1. Convert Internal CSS into inline CSS 
+2. Convert block tag such as `div` or `p` into `table` or `td` where applicable
+3. Build a series of properly organized table with just a few line of code
+4. Add necessary attribute and style for multiple email client support
+5. Enable you code less, test less and achieve good result
+6. Ease the frustration that comes from coding email
+
+### HOW IT WORKS
+
+You have to write you regular HTML 5 stynax with each tag following the prefix `x2`
+
+```php
+
+$EMAIL_HTML = "
+
+  <x2:html>
+  
+    <x2:head>
+    
+      <x2:style>
+        
+        .main {
+          margin: auto;
+          color: #000;
+          padding-top: 4rem;
+        }
+        
+        /* 
+          Applicable to all P Tags
+          -------------------------
+          You can either use p {} or x2:p {} in the css selector. both will work
+       */
+        
+        p {
+          font-size: 1rem;
+          text-align: left;
+        }
+        
+        x2:div.nested {
+          margin-right: auto;
+          display: block
+        }
+        
+      </x2:style>
+      
+    </x2:head>
+    
+    <x2:body>
+    
+      <x2:div class='main'>
+      
+        <x2:p>This is is the first paragraph</x2:p>
+        
+        <x2:div class='nested'>
+        
+          <div>This is a nested block</div>
+          
+          <x2:p>And this is a nested <x2:span>paragraph</x2:span></x2:p>
+          
+        </x2:div>
+        
+      </x2:div>
+      
+    </x2:body>
+    
+  </x2:html>
+  
+ ";
+```
+
+Next, you have to render the output using the X2Client instance;
+
+```php
+  
+  require_once "Path/To/X2Client.php";
+  
+  $X2Client = new X2Client( $EMAIL_HTML );
+  
+  echo $X2Client->render();
+  
+```
+
+### The Output
+
+```php
+
+
+<html>
+  <head>
+    <style>
+        .main {
+          margin: auto;
+          color: #000;
+          padding-top: 4rem;
+        }
+        
+        
+        
+        p {
+          font-size: 1rem;
+          text-align: left;
+        }
+        
+        x2:div.nested {
+          margin-right: auto;
+          display: block
+        }
+        
+      </style>
+  </head>
+  <body>
+    <table width="100%" align="left" border="0" cellspacing="0" cellpadding="0" style="max-width: 100%; table-layout: fixed; word-break: break-word;" data-marker=".main">
+      <tr>
+        <td style="font-size: 1rem; text-align: left" data-marker="p">
+          <table width="100%" align="left" border="0" cellspacing="0" cellpadding="0" style="max-width: 100%; table-layout: fixed; word-break: break-word;" data-marker="p">
+            <tr>
+              <td>This is is the first paragraph</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="margin-right: auto; display: block" data-marker=".nested">
+          <table width="100%" align="left" border="0" cellspacing="0" cellpadding="0" style="max-width: 100%; table-layout: fixed; word-break: break-word;" data-marker=".nested">
+            <tr>
+              <td data-marker="div">
+                <table width="100%" align="left" border="0" cellspacing="0" cellpadding="0" style="max-width: 100%; table-layout: fixed; word-break: break-word;" data-marker="div">
+                  <tr>
+                    <td>This is a nested block</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size: 1rem; text-align: left" data-marker="p">
+                <table width="100%" align="left" border="0" cellspacing="0" cellpadding="0" style="max-width: 100%; table-layout: fixed; word-break: break-word;" data-marker="p">
+                  <tr>
+                    <td>And this is a nested </td>
+                  </tr>
+                  <tr>
+                    <td data-marker="span">
+                      <span>paragraph</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+
+
+```
+
+It's that simple!
+
+For the reference, you can make an element display in columns (as in flex) by adding `display='flex'` to the block element
+
+```php
+
+<x2:div display='flex'>
+
+  <x2:div /> <!-- flex -->
+  
+  <x2:div /> <!-- flex -->
+  
+  <x2:div>  <!-- flex -->
+  
+    <x2:div /> <!-- not flex -->
+    
+  </x2:div> 
+  
+</x2:div>
+
+```
+
