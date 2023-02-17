@@ -1,6 +1,6 @@
 # X2Client
 
-Convert HTML 5 related syntax into Table format supported by all email clients
+Convert HTML 5 related syntax into Table format supported by **MULTIPLE** email clients
 
 One of the biggest pain ever encountered in coding is sending email. As advance as browsers are getting, the support for HTML 5 syntax is not versatile in email clients.
 
