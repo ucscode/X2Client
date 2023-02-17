@@ -367,7 +367,34 @@ class X2Client {
 				
 				/* Now! Append all the child table rows to it */
 					
-				foreach( $tr_list as $childTr ) $table->appendChild( $childTr );
+				foreach( $tr_list as $childTr ) {
+					
+					/*
+						Let's handle some few error!
+						Shall We?
+					*/
+					
+					if( $this->isEmpty( $childTr ) ) continue;
+					
+					/*
+						Only <tr /> can be a child of <table />
+						
+							( :-O I am not your browser so stop asking me about <tbody /> )
+							
+						Now back to business... I mean coding!
+					*/
+					
+					if( $childTr->nodeName != 'tr' ) {
+						$tr = $this->dom->createElement( 'tr' );
+						$td = $this->dom->createElement( 'td' );
+						$tr->appendChild( $td );
+						$td->appendChild( $childTr );
+						$childTr = $tr;
+					};
+					
+					$table->appendChild( $childTr );
+					
+				}
 				
 				/* 
 					Now we have to style and add the necessary attributes that most Email Client will require
