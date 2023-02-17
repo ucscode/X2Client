@@ -8,7 +8,7 @@
 	
 	Difficulty: Easy to use
 	
-	Version: 1.0
+	Version: 1.1
 	
 	Production Date: 17th Feburary 2023
 	
