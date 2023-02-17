@@ -618,13 +618,17 @@ class X2Client {
 	
 	protected function renderMode( $element, $css_selector ) {
 		
-		$css_selector = preg_replace( "/{$this->namespace}:/i", '', trim($css_selector) );
-		
-		$xquery = (string)(new Gt\CssXPath\Translator( $css_selector ));
-		
-		$node = $this->xpath->query( $xquery )->item( 0 );
-		
-		if( $node ) $element = $node;
+		if( !empty($css_selector) ) {
+			
+			$css_selector = preg_replace( "/{$this->namespace}:/i", '', trim($css_selector) );
+			
+			$xquery = (string)(new Gt\CssXPath\Translator( $css_selector ));
+			
+			$node = $this->xpath->query( $xquery )->item( 0 );
+			
+			if( $node ) $element = $node;
+			
+		};
 		
 		return $element;
 		
