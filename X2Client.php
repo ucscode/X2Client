@@ -28,6 +28,7 @@ class X2Client {
 	protected $hashTag;
 	protected $errors;
 	protected $cssRules;
+	protected $XML;
 	
 	protected $block = array(
 		"div",
@@ -153,7 +154,9 @@ class X2Client {
 		$this->dom->preserveWhiteSpace = false;
 		$this->dom->formatOutput = true;
 
-		$this->dom->loadXML( trim($xml) );
+		$this->XML = trim($xml);
+		
+		$this->dom->loadXML( $this->XML );
 		
 		/*
 			Now! Let's get ready to make some advance search using DOMXPath;
@@ -233,7 +236,7 @@ class X2Client {
 			"wbr"
 		);
 		foreach( $tags as $tagname ) {
-			$expression = "~<({$tagname}|{$this->namespace}:{$tagname}[^>]*)~";
+			$expression = "~<((?:{$tagname}|{$this->namespace}:{$tagname})[^>]*)~";
 			$syntax = preg_replace_callback( $expression , function($matches) {
 				$tag = $matches[0];
 				if( substr($tag, -1) != "/" ) $tag .= "/";
