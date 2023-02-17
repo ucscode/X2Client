@@ -305,7 +305,7 @@ class X2Client {
 			*/
 			
 			if( in_array($tag, $this->block) ) {
-				$node = $this->convert2Table( $node );
+				$node = $this->convert2Tr( $node );
 			} else $node = $this->renameNode( $node, $tag );
 			
 			/*
@@ -328,91 +328,74 @@ class X2Client {
 		return str_replace( $this->{"namespace"} . ":", '', $nodeName );
 	}
 	
-	protected function convert2Table( $node ) {
-		
-		// Create Table Element;
-		
-		$table = $this->dom->createElement('table');
+	protected function groupTr( $element ) {
 		
 		/*
-		
-			You can add display='flex' to a div element : <div id='' display='flex'>
-			
-			An it's child elements will be arranged in columns;
-			
-			No rows! 
-			Sorry! Columns...
-			
-			Whatever, the child elements will be grouped vertically like a flexbox
-			Rather than horizontally like regular block element!
-			
-			Should the tables data be arranged in rows;
+			We'll search for all the <tr/> element that has no <table/> parent
 		*/
 		
-		if( $node->parentNode->getAttribute('display') == 'flex' ) {
-			$parentTr = $this->dom->createElement('tr');
-		} else $parentTr = null;
+		$xpath = (string)(new Gt\CssXPath\Translator("tr"));
+		$nodes =  $this->xpath->query( $xpath );
 		
-		// Let's Create Child Element;
-		
-		foreach( $node->childNodes as $childNode ) {
+		for( $x = 0; $x < $nodes->length; $x++ ) {
 			
-			/*
-				Check if the node is an empty string
-				Empty string create irrelevant table rows 
-				Making the table extremely huge and ugly
-			*/
+			$tr = $nodes->item($x); // The <tr /> element
 			
-			if( $childNode->nodeType == 3 ) {
-				$nodeValue = trim($childNode->nodeValue);
-				if( empty($nodeValue) ) continue;
+			//Check if the parent is not a <table /> element
+			
+			if( $tr->parentNode->nodeName != 'table' ) {
+				
+				// Get the parent Node;
+				
+				$parentNode = $tr->parentNode; 
+				
+				// Create a Table Node So we can append the tr to it;
+				
+				$table = $this->dom->createElement('table');
+				
+				/*
+					Now we have to get a list of all <tr /> that should be appended to the table
+					Otherwise, a table will be forcefully and unwillingly created for each row irrespectively
+				*/
+				
+				$tr_list = array();
+				foreach( $tr->parentNode->childNodes as $childTr ) $tr_list[] = $childTr ;
+				
+				// Insert the table before the existence of the first table rows
+				
+				$parentNode->insertBefore( $table, $tr_list[0] );
+				
+				/* Now! Append all the child table rows to it */
+					
+				foreach( $tr_list as $childTr ) $table->appendChild( $childTr );
+				
+				/* 
+					Now we have to style and add the necessary attributes that most Email Client will require
+				*/
+				
+				$this->styleTable( $table );
+				
 			};
 			
-			// create <td/> and fill it with the element content;
-			
-			$td = $this->dom->createElement('td');
-			
-			$td->appendChild( $childNode->cloneNode(true) );
-			
-			/* 
-				create a new <tr />
-				or append to the 
-			*/
-			
-			$tr = $parentTr ?? $this->dom->createElement('tr');
-			$tr->appendChild( $td );
-			
-			$this->styleTd( $td, $childNode );
-			
-			// If a new row is created, append it to the table;
-			
-			if( !$parentTr ) $table->appendChild( $tr );
-			
-		};
-		
-		/*
-			If no new row was created, append the parent <tr />
-		*/
-		
-		if( $parentTr ) $table->append( $parentTr );
-		
-		/*
-			add the required attribute and style on the table;
-		*/
-		
-		$this->styleTable( $table, $node );
-		
-		/*
-			Now! Replace the node with the table element;
-		*/
-		
-		$node->parentNode->replaceChild( $table, $node );
-		
-		return $table;
+		}
 		
 	}
 	
-	protected function styleTable( $table, $node ) {
+	protected function convert2Tr( $node ) {
+		
+		// Create Table Element;
+		
+		$tr = $this->dom->createElement('tr');
+		$td = $this->renameNode( $node, 'td' );
+		$td->parentNode->insertBefore( $tr, $td );
+		$tr->appendChild( $td );
+		$this->styleTd( $td, $node );
+		
+		return $tr;
+		
+	}
+	
+	protected function styleTable( $table ) {
 		
 		/*
 		
@@ -421,8 +404,6 @@ class X2Client {
 			You have a better one? Let us know now!
 			
 		*/
-		
-		if( !$this->isElement( $node ) ) return;
 		
 		$attributes = array(
 			"width" => '100%',
@@ -436,8 +417,6 @@ class X2Client {
 		foreach( $attributes as $name => $value ) {
 			$table->setAttribute( $name, $value );
 		}
-		
-		$this->setMarker( $table, $node );
 		
 	}
 	
@@ -465,6 +444,14 @@ class X2Client {
 		
 		$this->setMarker( $td, $node );
 		
+	}
+	
+	protected function isEmpty( $node ) {
+		if( $node->nodeType == 3 ) {
+			$nodeValue = trim( $node->nodeValue );
+			return empty( $nodeValue );
+		};
+		return false;
 	}
 	
 	protected function isElement( $node ) {
@@ -562,6 +549,14 @@ class X2Client {
 			$this->transformNode( $element );
 			
 			/*
+				Now there are bunch of <tr/><td/> everywhere
+				None wrapped within a table.
+				Now! Let's group each tr based on parent Element
+			*/
+			
+			$this->groupTr( $element );
+			
+			/*
 				Let's get the final result!
 			*/
 			
@@ -599,6 +594,7 @@ class X2Client {
 		// Make them inline;
 		
 		foreach( $styles as $style ) {
+			$style->nodeValue = str_replace( "{$this->namespace}:", '', $style->nodeValue );
 			$this->parse_css( $style->nodeValue, $rules );
 		};
 		
