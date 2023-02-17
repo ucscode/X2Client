@@ -148,6 +148,7 @@ Next, you have to render the output using the X2Client instance;
 ```php
 
 
+
 <html>
   <head>
     <style>
@@ -164,7 +165,7 @@ Next, you have to render the output using the X2Client instance;
           text-align: left;
         }
         
-        x2:div.nested {
+        div.nested {
           margin-right: auto;
           display: block
         }
@@ -172,38 +173,21 @@ Next, you have to render the output using the X2Client instance;
       </style>
   </head>
   <body>
-    <table width="100%" align="left" border="0" cellspacing="0" cellpadding="0" style="max-width: 100%; table-layout: fixed; word-break: break-word;" data-marker=".main">
+    <table width="100%" align="left" border="0" cellspacing="0" cellpadding="0" style="max-width: 100%; table-layout: fixed; word-break: break-word;">
       <tr>
-        <td style="font-size: 1rem; text-align: left" data-marker="p">
-          <table width="100%" align="left" border="0" cellspacing="0" cellpadding="0" style="max-width: 100%; table-layout: fixed; word-break: break-word;" data-marker="p">
+        <td class="main" style="margin: auto; color: #000; padding-top: 4rem" data-marker=".main">
+          <table width="100%" align="left" border="0" cellspacing="0" cellpadding="0" style="max-width: 100%; table-layout: fixed; word-break: break-word;">
             <tr>
-              <td>This is is the first paragraph</td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-      <tr>
-        <td style="margin-right: auto; display: block" data-marker=".nested">
-          <table width="100%" align="left" border="0" cellspacing="0" cellpadding="0" style="max-width: 100%; table-layout: fixed; word-break: break-word;" data-marker=".nested">
-            <tr>
-              <td data-marker="div">
-                <table width="100%" align="left" border="0" cellspacing="0" cellpadding="0" style="max-width: 100%; table-layout: fixed; word-break: break-word;" data-marker="div">
-                  <tr>
-                    <td>This is a nested block</td>
-                  </tr>
-                </table>
-              </td>
+              <td style="font-size: 1rem; text-align: left" data-marker="p">This is is the first paragraph</td>
             </tr>
             <tr>
-              <td style="font-size: 1rem; text-align: left" data-marker="p">
-                <table width="100%" align="left" border="0" cellspacing="0" cellpadding="0" style="max-width: 100%; table-layout: fixed; word-break: break-word;" data-marker="p">
+              <td class="nested" style="margin-right: auto; display: block" data-marker=".nested">
+                <table width="100%" align="left" border="0" cellspacing="0" cellpadding="0" style="max-width: 100%; table-layout: fixed; word-break: break-word;">
                   <tr>
-                    <td>And this is a nested </td>
+                    <td data-marker="div">This is a nested block</td>
                   </tr>
                   <tr>
-                    <td data-marker="span">
-                      <span>paragraph</span>
-                    </td>
+                    <td style="font-size: 1rem; text-align: left" data-marker="p">And this is a nested <span>paragraph</span></td>
                   </tr>
                 </table>
               </td>
