@@ -85,17 +85,9 @@ class X2Client {
 			
 			SOLUTION: Let's get a list of all HTML entities and convert them to their numeric equivalence;
 			
-			Thanks to - https://github.com/w3c/html/blob/master/entities.json
-			
 		*/
 		
-		$entities = json_decode( file_get_contents( __DIR__ . "/entities.json" ), true );
-		
-		$syntax = preg_replace_callback( "/" . implode("|", array_keys($entities)) . "/i", function($match) use($entities) {
-			$key = $match[0];
-			$value = '&#' . $entities[$key]['codepoints'][0] . ";";
-			return $value;
-		}, $syntax );
+		$syntax = $this->xmlentities( $syntax );
 		
 		/*
 			ERROR 4: Error parsing attribute name
@@ -244,6 +236,43 @@ class X2Client {
 			}, $syntax );
 		};
 		return $syntax;
+	}
+	
+	/*
+		The xmlentities method was cloned from:
+		
+			`core::xmlentities` 
+		
+		A class in user synthetics ( By Ucscode )
+	*/
+	
+	protected function xmlentities( string $string = '' ) {
+		
+		/*
+			The XML entities data was moved to " xhtml-entities.json " file due to the large number of character it contains.
+			- Thus, absence of the file will result to false in converting HTML named entity to number entity;
+		*/
+		
+		$file = __DIR__ . '/xhtml-entities.json';
+		if( !is_file($file) ) return false;
+		
+		# Convert to JSON and validate the conversion;
+		
+		$content = json_decode( file_get_contents( $file ), true );
+		if( json_last_error() ) return false;
+		
+		// Combine the name and the Entities;
+		
+		$entities = array_map(function($value) {
+			return "&#{$value};";
+		}, array_column($content,'entity') );
+		
+		$XMLEntities = array_combine( array_keys($content), $entities );
+		
+		// Replace HTML named entites in the string;
+		
+		return strtr( $string, $XMLEntities );
+		
 	}
 	
 	protected function transformNode( $element ) {
