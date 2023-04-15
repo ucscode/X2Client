@@ -1,41 +1,50 @@
 <?php 
-
-/*
-
-	Project Name: X2Client
-	
-	Description: Convert HTML 5 related syntax into Table format supported by all email clients
-	
-	Difficulty: Easy to use
-	
-	Version: 1.1
-	
-	Production Date: 17th Feburary 2023
-	
-	Author: UCSCODE
-	
-	Author Website: https://ucscode.me
-	
-	Author Profile: https://github.com/ucscode
-	
-*/
+/**
+ * X2Client
+ *
+ * X2Client Converts HTML 5 related syntax into table format that are suitable for all email clients.
+ *
+ * @version 1.1.8
+ * @since 2023-02-17
+ * @author ucscode
+ * @link https://github.com/ucscode/X2Client
+ * @copyright Copyright (c) 2023
+ * @package X2Client
+ */
 
 class X2Client {
 	
+	/**
+	 * The namespace used accross X2Client
+	 *
+	 * @var string
+	 */
 	protected $namespace = "x2";
-	protected $domain = 'https://ucscode.me/x2client';
+	
+	protected $domain = 'https://github.com/ucscode/X2Client';
 	protected $dom;
 	protected $hashTag;
 	protected $errors;
 	protected $cssRules;
 	protected $XML;
 	
+	/**
+	 * Block level elements
+	 *
+	 * @var array
+	 */
 	protected $block = array(
 		"div",
 		"p"
 	);
 	
-	public function __construct( $syntax ) {
+	/**
+	 * X2Client Constructor
+	 *
+	 * @param string $syntax
+	 * 
+	 */
+	public function __construct( string $syntax ) {
 		
 		// Prevent Output Of XML Error;
 		
@@ -44,89 +53,91 @@ class X2Client {
 		# I'M NOT PERFECT! BUT I'LL TRY MY BEST TO HANDLE SOME BASIC XML ERRORS:
 		# LET'S DO THIS
 		
-		/* 
-			ERROR 1: EntityRef: expecting ';'
-			
-			SOLUTION: Replace & with &amp; only if it is not a valid HTML Entity;
-		*/
+		/** 
+		 * ERROR 1: EntityRef: expecting ';'
+		 * 
+		 * SOLUTION: Replace `&` with `&amp;` only if it is not a valid HTML Entity;
+		 */
 		
 		$syntax = preg_replace("/&(?!([\w\n]{2,7}|#[\d]{1,4});)/","&amp;", $syntax);
 		
-		/*
-			ERROR 2: Opening and ending tag mismatch: ...
-			
-			SOLUTION: Replace self-closing tags such as <br> with <br/>
+
+		/**
+		 * ERROR 2: Opening and ending tag mismatch: ...
+		 *
+		 * SOLUTION: Replace self-closing tags such as `<br>` with `<br/>`
 		*/
 		
 		$syntax = $this->handleMismatchedTags( $syntax );
 		
-		/*
-			ERROR 3: Entity 'x' not defined
-			Where x can be nbsp, mdash etc;
-			
-			These entities are valid for HTML but not valid for XML.
-			So! No fix available :(
-			
-			Wait!!! According to my research in:
-			
-			https://stackoverflow.com/questions/4645738/domdocument-appendxml-with-special-characters
-			
-			The only character entities that have an "actual name" defined (instead of using a numeric reference) are:
-			
-			- &amp; 
-			- &lt; 
-			- &gt; 
-			- &quot
-			- &apos;
-			
-			That means you have to use the numeric equivalent...
-			
-			---------------------------------------------------------
-			
-			SOLUTION: Let's get a list of all HTML entities and convert them to their numeric equivalence;
-			
+
+		/**
+		 * ERROR 3: Entity 'x' not defined
+		 * 
+		 * Where `x` represents an HTML entity such as `nbsp`, `mdash` etc;
+		 * These entities are valid for HTML but not valid for XML.
+		 * 
+		 * So! No fix available :(
+		 * 
+		 * Wait!!! According to my research in:
+		 * https://stackoverflow.com/questions/4645738/domdocument-appendxml-with-special-characters
+		 * 
+		 * > The only character entities that have an "actual name" defined (instead of using a numeric reference) are:
+		 * - &amp; 
+		 * - &lt; 
+		 * - &gt; 
+		 * - &quot
+		 * - &apos;
+		 *
+		 * That means you have to use the numeric equivalent...
+		 * 
+		 * ---------------------------------------------------------
+		 *	
+		 * SOLUTION: Let's get a list of all HTML entities and convert them to their numeric equivalence;
+		 * 
+		 * Evil Laugh: He..He..He..
 		*/
 		
 		$syntax = $this->xmlentities( $syntax );
 		
-		/*
-			ERROR 4: Error parsing attribute name
-			
-			I discovered this error when a CSS Comment was found on a style tag.
-			
-			/* ERROR CAUSE! * /
-			
-			SOLUTION: Remove CSS Comment Tags
+
+		/**
+		 * ERROR 4: Error parsing attribute name
+		 * 
+		 * I discovered this error when a CSS Comment was found on a style tag.
+		 * ## ERROR CAUSE!
+		 * 
+		 * SOLUTION: Remove CSS Comment Tags
 		*/
 		
 		$expression = "~\/\*(.*?)(?=\*\/)\*\/~s";
 		
 		$syntax = preg_replace( $expression, '', $syntax );
 		
-		/*
-			
-			Base on research, another problem came from using attribute value with a name
-			
-			<cardId ="01"> instead of <card Id="01">
-			
-			SOLUTION: NONE!
-			
-			WHY? 
-				- Because We can't tell whether 'cardId' is tag on it's own
-				- We also cannot tell whether the separation should be <car dId="01"> or <cardI d="01">
-			
-			It's left for the developer to monitor the syntax and correct such error!
-			
-		*/
+		/**
+		 * Base on research, another problem came from using attribute value with a name
+		 * 
+		 * `<cardId ="01">` instead of `<card Id="01">`
+		 * 
+		 * SOLUTION: NONE! :(
+		 * 
+		 * ### WHY? 
+		 * 
+		 * - Because We can't tell whether `cardId` is tag on it's own (since it's XML)
+		 * - We also cannot tell whether the separation should be `<car dId="01">` or `<cardI d="01">`
+		 * 
+		 * Therefore, It's left for the developer to monitor the syntax and correct such error!
+		 */
 		
 		/*
 			I'll try fixing more errors when I find them!
 			Let Proceed...
 		*/
 		
-		/* 
-			Now! Let's create a random string tag that we can use as the root element
-			On this root element, we declare our namespace
+
+		/**
+		 * Now! Let's create a random `string` as a tag that we can use as the root element
+		 * On this root element, we declare our namespace
 		*/
 		
 		$this->hashTag = "_" . sha1( mt_rand() );
@@ -137,9 +148,8 @@ class X2Client {
 			</{$this->namespace}:{$this->hashTag}>
 		";
 		
-		/*
-			Now! Let's Create DOMDocument and load the XML String;
-		*/
+
+		/** Now! Let's Create DOMDocument and load the XML String; */
 		
 		$this->dom = new DOMDocument( "1.0", "utf-8" );
 		
@@ -150,67 +160,81 @@ class X2Client {
 		
 		$this->dom->loadXML( $this->XML );
 		
-		/*
-			Now! Let's get ready to make some advance search using DOMXPath;
-			Since DOMDocument doesn't use css ;)
+
+		/**
+		 * Now! Let's get ready to make some advance search using DOMXPath;
+	     * Since DOMDocument doesn't use css ;)
 		*/
 		
 		$this->xpath = new DOMXPath( $this->dom );
 		$this->xpath->registerNamespace( $this->{"namespace"}, $this->domain );
 		
-		/*
-			Now Let's import a CSS to XPath Translator;
-			
-			I found this online and I love it because of it's simplicity
-			
-			https://github.com/PhpGt/CssXPath
-		*/
+
+		/**
+		 * Now Let's import a third party library known as the CSS to XPath Translator;
+		 * I found this online and I love it because of it's simplicity
+		 * @link https://github.com/PhpGt/CssXPath
+		 * 
+		 */
 		require_once __DIR__ . "/Translator.php";
 		
-		/*
-			USAGE: 
-			
-			$xPath = new Gt\CssXPath\Translator( "css selector" );
-			DOMXPath::Query( $xPath );
-			
-			Very simple!
-			
-			Now! Let's store the error.
-			
-			So Incase the XML Doesn't Load, We can easily check what's causing the problem;
-			
+
+		/** 
+		 * ## USAGE: 
+		 * 
+		 * ```php
+		 * $xPath = new Gt\CssXPath\Translator( "css selector" );
+		 * DOMXPath::Query( $xPath );
+		 * ```
+		 * 
+		 * Very simple!
+		 * Now! Let's capture the error.
+		 * So Incase the XML Doesn't Load, We can easily check what's causing the problem;
+		 *
 		*/
-		
+
 		$this->errors = libxml_get_errors();
 		
-		/*
-			After the 
-				
-				H2Client::__construct( $XML_STRING )
-				
-			The next thing is to render 
-			
-				H2Client::render();
-			
-			
+
+		/**
+		 * After calling the:
+		 * 
+		 * ```php
+		 * H2Client::__construct( $XML_STRING )
+		 * ```
+		 * 
+		 * The next thing is to render:
+		 * 
+		 * ```php
+		 * H2Client::render();
+		 * ```
 		*/
 		
 	}
 	
+	/**
+	 * X2Client magic __get method
+	 *
+	 * @param string $name
+	 * 
+	 * @return mixed
+	 * 
+	 */
 	public function __get($name) {
 		return $this->{$name} ?? null;
 	}
 	
-	protected function handleMismatchedTags( $syntax ) {
-		/*
+	/**
+	 * With this method, we can try to close *self-closing* tags that are not properly closed!
+	 * Such as using `<br>` instead of `<br/>`
+	 *
+	 * @param string $syntax
+	 * 
+	 * @return string
+	 * 
+	 */
+	protected function handleMismatchedTags( string $syntax ) {
 		
-			With the method, we try to close self-closing tags that are not closed!
-			such as using <br> instead of <br />
-			
-			Or better said:
-			using <x2:br> instead of <x2:br />
-			
-		*/
 		$tags = array(
 			"area", 
 			"base", 
@@ -227,6 +251,7 @@ class X2Client {
 			"track", 
 			"wbr"
 		);
+		
 		foreach( $tags as $tagname ) {
 			$expression = "~<((?:{$tagname}|{$this->namespace}:{$tagname})[^>]*)~";
 			$syntax = preg_replace_callback( $expression , function($matches) {
@@ -235,17 +260,23 @@ class X2Client {
 				return $tag;
 			}, $syntax );
 		};
+		
 		return $syntax;
+		
 	}
 	
-	/*
-		The xmlentities method was cloned from:
-		
-			`core::xmlentities` 
-		
-		A class in user synthetics ( By Ucscode )
-	*/
-	
+	/**
+	 * Convert unrecognized HTML entities to their numeric equivalence
+	 * 
+	 * Although this method was first created here, a better version was later cloned from `core::xmlentities`
+	 * 
+	 * @see core::xmlentities
+	 *
+	 * @param string $string
+	 * 
+	 * @return string
+	 * 
+	 */
 	protected function xmlentities( string $string = '' ) {
 		
 		/*
@@ -275,6 +306,20 @@ class X2Client {
 		
 	}
 	
+	/**
+	 * Convert namespaced nodes into regular HTML nodes
+	 * 
+	 * This method is responsible for transforming XML nodes into HTML nodes 
+	 * Such as converting `<x2:a href=''>` into `<a href=''>`
+	 * 
+	 * The method alos convert block elements such as `<x2:div/>` or `<x2:p/>`
+	 * into `<table/>` or `<td/>` elements
+	 *
+	 * @param object $element
+	 * 
+	 * @return null
+	 * 
+	 */
 	protected function transformNode( $element ) {
 		
 		/*
@@ -291,59 +336,57 @@ class X2Client {
 		
 		if( !$element ) return;
 		
-		/*
-			Let's search for the children of the element that should be transformed
-			
-			However, we cannot use a foreach loop!
-			
-			But Why :-/ ?
-			
-			Because we are going to be replacing the child nodes with lots of <table/>, </tr> and other regular non-namespace element.
-			
-			Since nodes are passed by reference, then, when we remove an element by replacing it with another one, 
-			the element no longer exists in the node list, and the next one in line takes its position in the index. 
-			Then when foreach hits the next iteration, and hence the next index, one will be effectively skipped
-			
-			And we definitely don't wanna skip any node!
-			
-			SOLUTION: Use for loop. :-)
-			
-		*/
 		
+		/**
+		 * Now let's search for the children of the elements that should be transformed
+		 * However, we cannot user a foreach loop to accomplish this.
+		 * 
+		 * ##### Why?
+		 * 
+		 * Because we are going to be replacing child nodes with a lot of `<table/>`, `<tr/>` and other none namespaced HTML element.
+		 * 
+		 * Since nodes are passed by reference, then, when we remove an element by replacing it with another one, the element will no longer exist in the nodelist and the next one in line takes its position of index.
+		 * 
+		 * Hence, when foreach reaches the next iteration, it will skip the index and the node will not be processed.
+		 * 
+		 * We definitely don't wanna skip any node!
+		 * 
+		 * Solution: Use `for` loop instead. ;)
+		 */
 		for( $x = 0; $x < $element->childNodes->length; $x++ ) {
 			
 			// Get the childNode;
 			
 			$node = $element->childNodes->item($x);
 			
-			/*
-				Unfortunately, there are different kinds of node!
-				But we want only element Nodes
+			/**
+			 * Unfortunately, there are different kinds of node!
+			 * But we want only element Nodes
 			*/
 			
 			if( !$this->isElement( $node ) ) continue;
 			
-			/*
-				Now let's get the original tagName;
-				converting - x2:div into div
+			/**
+			 * Now let's get the original tagName;
+			 * converting namespaced nodes into HTML nodes &mdash; `x2:div` into `div`
 			*/
 			
 			$tag = $this->HTMLTag( $node->nodeName );
 			
-			/*
-				If the tag is a block element such as DIV | P
-				We convert it into a table.
-				Otherwise, we replace it with an equivalent element that doesn't have namespace
+			/**
+			 * If the tag is a block element such as DIV | P
+			 * We convert it into a table.
+			 * Otherwise, we replace it with an equivalent nodename that doesn't have namespace
 			*/
 			
 			if( in_array($tag, $this->block) ) {
 				$node = $this->convert2Tr( $node );
 			} else $node = $this->renameNode( $node, $tag );
 			
-			/*
-				If the node has child Elements!
-				Then that means we're not done yet.
-				We just have to repeat the process again
+			/**
+			 * If the node has child Elements!
+			 * Then that means we're not done yet.
+			 * We just have to repeat the process again
 			*/
 			
 			if( $node->childNodes->length ) $this->transformNode( $node );
@@ -352,28 +395,31 @@ class X2Client {
 		
 	}
 	
+	/**
+	 * Get the HTML Tag name without namespace
+	 *
+	 * @param string $nodeName
+	 * 
+	 * @return string
+	 * 
+	 */
 	protected function HTMLTag( $nodeName ) {
-		/*
-			Get the original element name!
-			We achieve this by removing the namespace from the tagName
-		*/
+		// This is achieved by simply removing the namespace from the tagName
 		return str_replace( $this->{"namespace"} . ":", '', $nodeName );
 	}
 	
 	protected function groupTr( $element ) {
 		
-		/*
-			We'll search for all the <tr/> element that has no <table/> parent
-		*/
+		// We'll search for all the `<tr/>` element that has no `<table/>` parent
 		
 		$xpath = (string)(new Gt\CssXPath\Translator("tr"));
 		$nodes =  $this->xpath->query( $xpath );
 		
 		for( $x = 0; $x < $nodes->length; $x++ ) {
 			
-			$tr = $nodes->item($x); // The <tr /> element
+			$tr = $nodes->item($x); // Get the `<tr/>` element
 			
-			//Check if the parent is not a <table /> element
+			//Check if the parent is not a `<table/>` element
 			
 			if( $tr->parentNode->nodeName != 'table' ) {
 				
@@ -409,10 +455,12 @@ class X2Client {
 					if( $this->isEmpty( $childTr ) ) continue;
 					
 					/*
-						Only <tr /> can be a child of <table />
+						ME: Hey, only `<tr/>` elements can be a child of `<table/>`, am i right?
 						
-							( :-O I am not your browser so stop asking me about <tbody /> )
+						Firefox: Well, you didn't use me as your default browser so I won't tell you anything about `<tbody/>`
 							
+						ME: :\ ?
+						
 						Now back to business... I mean coding!
 					*/
 					
@@ -440,6 +488,14 @@ class X2Client {
 		
 	}
 	
+	/**
+	 * Converts a node into `<tr/>` element
+	 *
+	 * @param object $node
+	 * 
+	 * @return DOMNode 
+	 * 
+	 */
 	protected function convert2Tr( $node ) {
 		
 		// Create Table Element;
@@ -456,12 +512,9 @@ class X2Client {
 	
 	protected function styleTable( $table ) {
 		
-		/*
-		
-			This table attribute advice was from MailMunch
-			
-			You have a better one? Let us know now!
-			
+		/**
+		 * This table attribute below were recommended by MailMunch
+		 * You have a better one? Let me know now!
 		*/
 		
 		$attributes = array(
@@ -481,9 +534,14 @@ class X2Client {
 	
 	protected function styleTd( $td, $node ) {
 		
-		/*
-			Right here, we inherit the style of the element
-			By passing it to the <td />
+		/**
+		 * Right here, we pass the style of the element to the `<td/>`
+		 *
+		 * What i mean is if an element is created as `<x2:p style='width:100%' data-info/>`
+		 * 
+		 * The attributes `style` and `data-info` will be forwareded to the `<td>` element that was created as a replacement for the `<x2:p/>` element
+		 * 
+		 * So it becomes: `<td style='width:100%' data-info>`
 		*/
 		
 		if( !$this->isElement($node) ) return;
@@ -505,6 +563,14 @@ class X2Client {
 		
 	}
 	
+	/**
+	 * Check if a node contains no value
+	 *
+	 * @param object $node
+	 * 
+	 * @return boolean
+	 * 
+	 */
 	protected function isEmpty( $node ) {
 		if( $node->nodeType == 3 ) {
 			$nodeValue = trim( $node->nodeValue );
@@ -519,16 +585,14 @@ class X2Client {
 	
 	protected function setMarker( $el, $node ) {
 		
-		/*
-			Seriously, writing this script was so confusing!
-			The script was tested with a complete HTML page loaded with syntax
-			
-			Anyway! The marker helps us leave a trace so we can use to know which element was converted to 
-			<table /> or <td /> element.
-			
-			As well as identity the element parents after the conversion!
-			
-		*/
+		/**
+		 * Seriously, writing this script was so confusing!
+		 * Then the marker came to the rescue
+		 * 
+		 * Marker helps us leave a trace that we can use to know which element was converted or associated to a `<table/>` or `<td/>` element
+		 * 
+		 * It also enables us to identity the element's parent after the conversion
+		 */
 		
 		if( !$this->isElement($node) ) return;
 		
@@ -556,13 +620,13 @@ class X2Client {
 	
 	protected function renameNode( $node, $tag ) {
 		
-		/*
-		
-			DOMDocument Node cannot be renamed.
-			Therefore, we need to create a new element, assign the new name to it and replace the old element
-			
-			If you ask me once more why we use for loop to transformNode, I'll punch your face!
-			
+		/**
+		 * DOMDocument Node cannot be renamed.
+		 * Therefore, we need to create a new element, assign the new name to it and replace the old element
+		 * 
+		 * If you ask me one more time why we use `for` loop instead of a `foreach` to transform Nodes, 
+		 * I'll punch your face!
+		 *
 		*/
 		
 		$newNode = $this->dom->createElement( $tag );
@@ -581,16 +645,21 @@ class X2Client {
 		
 	}
 	
+	/**
+	 * Returns a string containing the HTML output
+	 *
+	 * The only public method available in this package after the constructor
+	 * 
+	 * The only public method availabe in this library after the __constructor();
+	 * It either gives you the result you need or false
+	 * If it returns false, then you should consider using X2Client::$errors to check for errors
+	 * 
+	 * @param string|null $css_selector Select a part of the node you want to render
+	 * 
+	 * @return string|bool
+	 * 
+	 */
 	public function render( ?string $css_selector = null ) {
-		
-		/*
-		
-			The only public method availabe in this library after the __constructor();
-			It either gives you the result you need or false
-			
-			If it returns false, then you should consider using X2Client::$errors to check for errors
-			
-		*/
 		
 		if( empty($this->errors) ) {
 			
@@ -598,9 +667,9 @@ class X2Client {
 			
 			$element = $this->dom->getElementsByTagNameNS( $this->domain, $this->hashTag )->item(0);
 			
-			/*
-				Now! Convert Internal CSS into Inline CSS
-				Unless you want email clients to stripe your <style /> tag and make your email look like shit!
+			/**
+			 * Now! Convert Internal CSS into Inline CSS
+			 * Unless you want email clients to stripe your `<style/>` tag and make your email look like shit!
 			*/
 			
 			$this->captureCss( $element );
@@ -612,17 +681,15 @@ class X2Client {
 			
 			$this->transformNode( $element );
 			
-			/*
-				Now there are bunch of <tr/><td/> everywhere
-				None wrapped within a table.
-				Now! Let's group each tr based on parent Element
+			/**
+			 * Oh No! Now there are bunch of `<tr><td/></tr>` everywhere
+			 * None wrapped within a table.
+			 * Now! Let's group each `tr` based on parent Element
 			*/
 			
 			$this->groupTr( $element );
 			
-			/*
-				Let's get the final result!
-			*/
+			// Let's get the final result!
 			
 			$result = '';
 			
@@ -635,8 +702,11 @@ class X2Client {
 					
 			} else $result = $this->dom->saveXML( $nodeParent );
 			
-			/*
-				Hurray! We made it!
+			/**
+			 * Hurray! 
+			 * Finally, We made it!
+			 * 
+			 * Someone should consider buying me an ice cream
 			*/
 			
 			return $result;
@@ -645,6 +715,15 @@ class X2Client {
 		
 	}
 	
+	/**
+	 * Converts css selector into XPath and uses it to search for element to render
+	 *
+	 * @param object $element
+	 * @param string $css_selector
+	 * 
+	 * @return DOMNode
+	 * 
+	 */
 	protected function renderMode( $element, $css_selector ) {
 		
 		if( !empty($css_selector) ) {
@@ -663,6 +742,14 @@ class X2Client {
 		
 	}
 	
+	/**
+	 * Get internal css rules and convert them into an array
+	 *
+	 * @param object $node
+	 * 
+	 * @return array
+	 * 
+	 */
 	protected function captureCss( $node ) {
 		
 		$rules = array();
@@ -692,11 +779,16 @@ class X2Client {
 		
 	}
 	
+	/**
+	 * This is literally the method the parses the css rules and turns them into an array
+	 *
+	 * @param string $css
+	 * @param mixed $css_array
+	 * 
+	 * @return [type]
+	 * 
+	 */
 	protected function parse_css( string $css, &$css_array ) {
-		
-		/*
-			This css parser, created by me :] works like magic;
-		*/
 		
 		$elements = explode('}', $css);
 		
