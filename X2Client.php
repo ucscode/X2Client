@@ -2,7 +2,7 @@
 /**
  * X2Client
  *
- * X2Client Converts HTML 5 related syntax into table format that are suitable for all email clients.
+ * X2Client Converts XML related syntax into table format that are suitable for all email clients.
  *
  * @version 1.1.8
  * @since 2023-02-17
@@ -18,20 +18,28 @@ class X2Client {
 	 * The namespace used accross X2Client
 	 *
 	 * @var string
+	 * @ignore
 	 */
 	protected $namespace = "x2";
 	
+	/** @ignore */
 	protected $domain = 'https://github.com/ucscode/X2Client';
+	/** @ignore */
 	protected $dom;
+	/** @ignore */
 	protected $hashTag;
+	/** @ignore */
 	protected $errors;
+	/** @ignore */
 	protected $cssRules;
+	/** @ignore */
 	protected $XML;
 	
 	/**
 	 * Block level elements
 	 *
 	 * @var array
+	 * @ignore
 	 */
 	protected $block = array(
 		"div",
@@ -112,7 +120,7 @@ class X2Client {
 		
 		$expression = "~\/\*(.*?)(?=\*\/)\*\/~s";
 		
-		$syntax = preg_replace( $expression, '', $syntax );
+		$syntax = trim( preg_replace( $expression, '', $syntax ) );
 		
 		/**
 		 * Base on research, another problem came from using attribute value with a name
@@ -132,7 +140,11 @@ class X2Client {
 		/*
 			I'll try fixing more errors when I find them!
 			Let Proceed...
+			
+			Finally, we have to remove the <!doctype html> declaration as we're moving to the XML Environment
 		*/
+		
+		$syntax = trim(preg_replace("#^<(?:x2:)?!doctype html>#", null, $syntax));
 		
 
 		/**
@@ -214,6 +226,8 @@ class X2Client {
 	
 	/**
 	 * X2Client magic __get method
+	 * 
+	 * @method __get
 	 *
 	 * @param string $name
 	 * 
@@ -231,7 +245,7 @@ class X2Client {
 	 * @param string $syntax
 	 * 
 	 * @return string
-	 * 
+	 * @ignore
 	 */
 	protected function handleMismatchedTags( string $syntax ) {
 		
@@ -275,7 +289,7 @@ class X2Client {
 	 * @param string $string
 	 * 
 	 * @return string
-	 * 
+	 * @ignore
 	 */
 	protected function xmlentities( string $string = '' ) {
 		
@@ -318,7 +332,7 @@ class X2Client {
 	 * @param object $element
 	 * 
 	 * @return null
-	 * 
+	 * @ignore
 	 */
 	protected function transformNode( $element ) {
 		
@@ -401,13 +415,16 @@ class X2Client {
 	 * @param string $nodeName
 	 * 
 	 * @return string
-	 * 
+	 * @ignore
 	 */
 	protected function HTMLTag( $nodeName ) {
 		// This is achieved by simply removing the namespace from the tagName
 		return str_replace( $this->{"namespace"} . ":", '', $nodeName );
 	}
 	
+	/**
+	 * @ignore
+	 */
 	protected function groupTr( $element ) {
 		
 		// We'll search for all the `<tr/>` element that has no `<table/>` parent
@@ -494,7 +511,7 @@ class X2Client {
 	 * @param object $node
 	 * 
 	 * @return DOMNode 
-	 * 
+	 * @ignore
 	 */
 	protected function convert2Tr( $node ) {
 		
@@ -510,6 +527,9 @@ class X2Client {
 		
 	}
 	
+	/**
+	 * @ignore
+	 */
 	protected function styleTable( $table ) {
 		
 		/**
@@ -532,6 +552,9 @@ class X2Client {
 		
 	}
 	
+	/**
+	 * @ignore
+	 */
 	protected function styleTd( $td, $node ) {
 		
 		/**
@@ -569,7 +592,7 @@ class X2Client {
 	 * @param object $node
 	 * 
 	 * @return boolean
-	 * 
+	 * @ignore
 	 */
 	protected function isEmpty( $node ) {
 		if( $node->nodeType == 3 ) {
@@ -579,10 +602,16 @@ class X2Client {
 		return false;
 	}
 	
+	/**
+	 * @ignore
+	 */
 	protected function isElement( $node ) {
 		return $node->nodeType === 1;
 	}
 	
+	/** 
+	 * @ignore
+	 */
 	protected function setMarker( $el, $node ) {
 		
 		/**
@@ -618,6 +647,9 @@ class X2Client {
 		
 	}
 	
+	/**
+	 * @ignore
+	 */
 	protected function renameNode( $node, $tag ) {
 		
 		/**
@@ -722,7 +754,7 @@ class X2Client {
 	 * @param string $css_selector
 	 * 
 	 * @return DOMNode
-	 * 
+	 * @ignore
 	 */
 	protected function renderMode( $element, $css_selector ) {
 		
@@ -748,7 +780,7 @@ class X2Client {
 	 * @param object $node
 	 * 
 	 * @return array
-	 * 
+	 * @ignore
 	 */
 	protected function captureCss( $node ) {
 		
@@ -786,7 +818,7 @@ class X2Client {
 	 * @param mixed $css_array
 	 * 
 	 * @return [type]
-	 * 
+	 * @ignore
 	 */
 	protected function parse_css( string $css, &$css_array ) {
 		
@@ -834,7 +866,12 @@ class X2Client {
 		
 	}
 	
+	/**
+	 * @ignore
+	 */
 	protected function injectInlineCss( $nodes, $style ) {
+		
+		if( !$nodes ) return;
 		
 		/*
 			Convert the style from an array to a string
@@ -849,8 +886,8 @@ class X2Client {
 		$inlineStyle = implode( "; ", $inlineStyle );
 		
 		// Now push the string into the node;
-		
-		foreach( $nodes as $node ) {
+
+		foreach( iterator_to_array($nodes) as $node ) {
 			$node->setAttribute( 'style', $inlineStyle );
 		}
 		
