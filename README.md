@@ -102,6 +102,6 @@ The resulting output will be an HTML table suitable for email clients.
 
 ## API Reference
 
-For detailed documentation of the API, please refer to the [API Documentation](https://example.com/api-docs).
+For detailed documentation of the API, please refer to the [API Documentation](https://ucscode.me/?p=1).
 
 Feel free to explore and integrate X2Client into your email coding workflow.
